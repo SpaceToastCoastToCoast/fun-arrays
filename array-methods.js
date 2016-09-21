@@ -77,6 +77,54 @@ var sumOfInterests = statesWithInterestToSum.map(function(element) {
   return parseFloat(element.amount) * 0.189;
 }).reduce(interestSum, 0);
 
+
+
+
+// });
+// var statesToSum = highInterestStates.map(function(element, index) {
+//   var s = [];
+//   if(s.indexOf(element.state) === -1) {
+//     s.push(element.state);
+//   }
+//   return s[s.indexOf(element.state)];
+// });
+// var highInterestApplied = highInterestStates.map(function(element) {
+//   return {
+//     amount: parseFloat(element.amount) * 0.189,
+//     state: element.state
+//   };
+// });
+// var sums = statesToSum.map(function() {return 0;});
+// var highInterestSummed = highInterestApplied.map(function(element) {
+//   sums[statesToSum.indexOf(element.state)] += parseFloat(element.amount);
+//   return sums[statesToSum.indexOf(element.state)];
+// });
+// var greaterThanFiftyThou = highInterestSummed.filter(function(element) {
+//   return element > 50000;
+// });
+// //console.log(greaterThanFiftyThou);
+
+/*
+  aggregate the sum of bankBalance amounts
+  grouped by state
+  set stateSums to be a hash table
+    where the key is the two letter state abbreviation
+    and the value is the sum of all amounts from that state
+      the value must be rounded to the nearest cent
+ */
+var obj = {};
+var stateSumMaker = function(element) {
+  if(!obj.hasOwnProperty(element.state)) {
+    obj[element.state] = parseFloat(element.amount);
+  } else if (obj.hasOwnProperty(element.state)) {
+    obj[element.state] += parseFloat(element.amount);
+  }
+  obj[element.state] = (Math.round(obj[element.state] * 100) / 100);
+  return obj;
+};
+dataset.bankBalances.map(stateSumMaker);
+var stateSums = obj;
+
 /*
   set sumOfHighInterests to the sum of the 18.9% interest
   for all amounts in bankBalances
@@ -91,17 +139,34 @@ var sumOfInterests = statesWithInterestToSum.map(function(element) {
     Delaware
   the result should be rounded to the nearest cent
  */
-var sumOfHighInterests = null;
 
-/*
-  aggregate the sum of bankBalance amounts
-  grouped by state
-  set stateSums to be a hash table
-    where the key is the two letter state abbreviation
-    and the value is the sum of all amounts from that state
-      the value must be rounded to the nearest cent
- */
-var stateSums = null;
+var highInterestStates = dataset.bankBalances.filter(function(element) {
+  return interestStates.indexOf(element.state) === -1;
+});
+
+var stateHighSumMaker = function(element) {
+  if(!obj.hasOwnProperty(element.state)) {
+    obj[element.state] = parseFloat(element.amount) * 0.189;
+  } else if (obj.hasOwnProperty(element.state)) {
+    obj[element.state] += parseFloat(element.amount) * 0.189;
+  }
+  obj[element.state] = obj[element.state];
+  return obj;
+};
+
+obj = {};
+var highInterestStateSums = highInterestStates.map(stateHighSumMaker);
+var interestKeys = Object.keys(obj).map(function(element, index) {
+  return obj[element];
+});
+var overFiftyThou = interestKeys.filter(function(element) {
+  return element > 50000;
+});
+
+var sumOfHighInterests = overFiftyThou.reduce(bankSum, 0);
+console.log(sumOfHighInterests);
+
+
 
 /*
   set lowerSumStates to an array containing
